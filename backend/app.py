@@ -21,6 +21,46 @@ app = Flask(__name__)
 CORS(app)
 DB_NAME = 'recipes.db'
 
+def init_db():
+    """初始化数据库"""
+    conn = sqlite3.connect(DB_NAME)
+    cursor = conn.cursor()
+
+    # 创建菜谱表
+    cursor.execute('''
+        CREATE TABLE IF NOT EXISTS recipes (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            name TEXT NOT NULL,
+            image TEXT,
+            sales INTEGER DEFAULT 0
+        )
+    ''')
+
+    # 检查是否有数据，如果没有则添加示例数据
+    cursor.execute("SELECT COUNT(*) FROM recipes")
+    count = cursor.fetchone()[0]
+
+    if count == 0:
+        # 添加示例菜谱
+        sample_recipes = [
+            ('咖喱饭', 'https://images.unsplash.com/photo-1565299624946-b28f40a0ca4b?w=400&h=300&fit=crop', 89),
+            ('宫保鸡丁', 'https://images.unsplash.com/photo-1603133872878-684f208fb84b?w=400&h=300&fit=crop', 156),
+            ('麻婆豆腐', 'https://images.unsplash.com/photo-1581833971358-2c8b550f87b3?w=400&h=300&fit=crop', 234),
+            ('红烧肉', 'https://images.unsplash.com/photo-1574484284002-952d92456975?w=400&h=300&fit=crop', 178),
+            ('蛋挞', 'https://images.unsplash.com/photo-1571115764595-644a1f56a55c?w=400&h=300&fit=crop', 312)
+        ]
+
+        cursor.executemany(
+            "INSERT INTO recipes (name, image, sales) VALUES (?, ?, ?)",
+            sample_recipes
+        )
+
+    conn.commit()
+    conn.close()
+
+# 初始化数据库
+init_db()
+
 def get_db_connection():
     conn = sqlite3.connect(DB_NAME)
     conn.row_factory = sqlite3.Row

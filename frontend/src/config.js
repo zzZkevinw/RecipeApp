@@ -4,9 +4,9 @@ const config = {
   development: {
     API_BASE_URL: 'http://127.0.0.1:5000'
   },
-  // 生产环境 - 这里需要替换为你的后端部署地址
+  // 生产环境 - 部署后端后替换为实际URL
   production: {
-    API_BASE_URL: 'https://your-backend-url.onrender.com' // 替换为实际的后端地址
+    API_BASE_URL: 'https://recipe-app-backend-xxx.onrender.com' // 部署后端后替换为实际的后端地址
   }
 }
 
