@@ -47,8 +47,8 @@ rows = cursor.fetchall()
 print("🔄 数据重置完成！")
 print("\n📋 当前菜谱数据：")
 for row in rows:
-    print(f"ID: {row[0]}, 名称: {row[1]}, 销量: {row[2]}")
-    print(f"图片: {row[3][:60]}...")
+    print(f"ID: {row[0]}, 名称: {row[1]}, 销量: {row[3]}")
+    print(f"图片: {row[2][:60]}...")
     print("-" * 50)
 
 conn.close()

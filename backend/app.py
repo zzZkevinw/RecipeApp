@@ -99,6 +99,68 @@ def add_recipe():
 
     return jsonify({'message': '添加成功'}), 201
 
+@app.route('/recipes/<int:recipe_id>', methods=['PUT'])
+def update_recipe(recipe_id):
+    """更新菜谱信息"""
+    data = request.get_json()
+
+    name = data.get('name')
+    image = data.get('image', '')
+
+    # 简单校验
+    if not name:
+        return jsonify({'error': '菜名不能为空'}), 400
+
+    try:
+        conn = get_db_connection()
+        cursor = conn.cursor()
+
+        # 检查菜谱是否存在
+        cursor.execute("SELECT id FROM recipes WHERE id = ?", (recipe_id,))
+        if not cursor.fetchone():
+            conn.close()
+            return jsonify({'error': '菜谱不存在'}), 404
+
+        # 更新菜谱
+        cursor.execute(
+            "UPDATE recipes SET name = ?, image = ? WHERE id = ?",
+            (name, image, recipe_id)
+        )
+        conn.commit()
+        conn.close()
+
+        return jsonify({'message': '更新成功'}), 200
+
+    except Exception as e:
+        return jsonify({'error': f'更新失败: {str(e)}'}), 500
+
+@app.route('/recipes/<int:recipe_id>', methods=['DELETE'])
+def delete_recipe(recipe_id):
+    """删除菜谱"""
+    try:
+        conn = get_db_connection()
+        cursor = conn.cursor()
+
+        # 检查菜谱是否存在
+        cursor.execute("SELECT id, name FROM recipes WHERE id = ?", (recipe_id,))
+        recipe = cursor.fetchone()
+        if not recipe:
+            conn.close()
+            return jsonify({'error': '菜谱不存在'}), 404
+
+        # 删除菜谱
+        cursor.execute("DELETE FROM recipes WHERE id = ?", (recipe_id,))
+        conn.commit()
+        conn.close()
+
+        return jsonify({
+            'message': f'菜谱 "{recipe[1]}" 已成功删除',
+            'deleted_id': recipe_id
+        }), 200
+
+    except Exception as e:
+        return jsonify({'error': f'删除失败: {str(e)}'}), 500
+
 def send_order_email(order_data):
     """发送订单邮件"""
     try:
