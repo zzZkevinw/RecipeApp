@@ -214,6 +214,43 @@ def place_order():
     except Exception as e:
         return jsonify({'error': f'下单失败: {str(e)}'}), 500
 
+@app.route('/reset-data', methods=['POST'])
+def reset_data():
+    """重置所有菜谱的销量为0并更新图片"""
+    try:
+        conn = get_db_connection()
+        cursor = conn.cursor()
+
+        # 1. 重置所有销量为0
+        cursor.execute("UPDATE recipes SET sales = 0")
+
+        # 2. 更新所有菜谱的图片为正确的URL
+        recipes_data = [
+            ('咖喱饭', 'https://images.unsplash.com/photo-1585937421612-70a008356fbe?w=400&h=300&fit=crop&crop=center'),
+            ('宫保鸡丁', 'https://images.unsplash.com/photo-1603133872878-684f208fb84b?w=400&h=300&fit=crop&crop=center'),
+            ('麻婆豆腐', 'https://images.unsplash.com/photo-1581833971358-2c8b550f87b3?w=400&h=300&fit=crop&crop=center'),
+            ('红烧肉', 'https://images.unsplash.com/photo-1574484284002-952d92456975?w=400&h=300&fit=crop&crop=center'),
+            ('蛋挞', 'https://images.unsplash.com/photo-1571115764595-644a1f56a55c?w=400&h=300&fit=crop&crop=center')
+        ]
+
+        # 更新每个菜谱的图片
+        for name, image_url in recipes_data:
+            cursor.execute(
+                "UPDATE recipes SET image = ? WHERE name = ?",
+                (image_url, name)
+            )
+
+        conn.commit()
+        conn.close()
+
+        return jsonify({
+            'message': '数据重置成功！所有销量已归零，图片已更新。',
+            'reset_count': len(recipes_data)
+        }), 200
+
+    except Exception as e:
+        return jsonify({'error': f'重置失败: {str(e)}'}), 500
+
 if __name__ == '__main__':
     import os
     port = int(os.environ.get('PORT', 5000))
